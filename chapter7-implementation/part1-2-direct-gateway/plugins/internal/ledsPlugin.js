@@ -1,13 +1,13 @@
 var resources = require('./../../resources/model');
 
-var actuator, interval;
+var actuator, interval, handler;
 var model = resources.pi.actuators.leds['1'];
 var pluginName = model.name;
-var localParams = {'simulate': false, 'frequency': 2000};
+var localParams = { 'simulate': false, 'frequency': 2000 };
 
 exports.start = function (params) {
   localParams = params;
-  observe(model); //#A
+  resources.registerSubscriber(model, handler); //#A
 
   if (localParams.simulate) {
     simulate();
@@ -17,6 +17,7 @@ exports.start = function (params) {
 };
 
 exports.stop = function () {
+  resources.unregisterSubscriber(model, handler);
   if (localParams.simulate) {
     clearInterval(interval);
   } else {
@@ -25,12 +26,10 @@ exports.stop = function () {
   console.info('%s plugin stopped!', pluginName);
 };
 
-function observe(what) {
-  Object.observe(what, function (changes) {
-    console.info('Change detected by plugin for %s...', pluginName);
-    switchOnOff(model.value); //#B
-  });
-};
+function handler(resource, prop, value) {
+  console.info("Change detected by plugin for %s: %s = %s", resource.name, prop, value);
+  switchOnOff(value); //#B
+}
 
 function switchOnOff(value) {
   if (!localParams.simulate) {
@@ -54,6 +53,7 @@ function simulate() {
     } else {
       model.value = true;
     }
+    console.log(`Simulated value is now ${model.value}`)
   }, localParams.frequency);
   console.info('Simulated %s actuator started!', pluginName);
 };
