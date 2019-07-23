@@ -5,11 +5,11 @@ const sensors = resources.pi.sensors;
 const registrations = new Map();
 
 resources.registerSubscriber = (resource, onChangeHandler) => {
-  registrations[resource.name].add(onChangeHandler);
+  registrations.get(resource).add(onChangeHandler);
 };
 
 resources.unregisterSubscriber = (resource, onChangeHandler) => {
-  registrations[resource.name].delete(onChangeHandler);
+  registrations.get(resource).delete(onChangeHandler);
 };
 
 // Actuator resources are observable for hardware drivers to detect
@@ -29,7 +29,7 @@ function createProxy(target) {
     set: function (obj, prop, value, proxy) {
       obj[prop] = value;
       if (prop === "value") {
-        for (let handler of registrations[proxy.name]) {
+        for (let handler of registrations.get(proxy)) {
           handler(proxy, prop, value);
         }
       }
@@ -37,7 +37,7 @@ function createProxy(target) {
     }
   });
   // Use Set to keep track of listeners, allowing unsubscribe fn
-  registrations[proxy.name] = new Set();
+  registrations.set(proxy, new Set());
   return proxy;
 }
 
