@@ -41,3 +41,6 @@ chapter7-implementation/part3-cloud/payloads/
 
 
 chapter7-implementation/part3-cloud/config.json
+
+# Visual Studio Code user settings
+*.vscode/
