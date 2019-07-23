@@ -6,15 +6,17 @@ exports.listen = function (server) {
   console.info('WebSocket server started...');
   wss.on('connection', function (ws) { //#B
     var url = ws.upgradeReq.url;
-    console.info(url);
     try {
-      resources.registerSubscriber(selectResource(url), function (obj, prop, value, proxy) {
-        ws.send(JSON.stringify({ value: value }))
-      });
-      // Object.observe(selectResouce(url), function (changes) { //#C
-      //   ws.send(JSON.stringify(changes[0].object), function () {
-      //   });
-      // })
+      console.info("WS connection: " + url);
+      const resource = selectResouce(url);
+      const handler = function handler(obj, prop, value, proxy) {
+        ws.send(JSON.stringify({ name: resource.name, value: value }))
+      }
+      resources.registerSubscriber(resource, handler);
+      ws.on('close', function close() {
+        resources.unregisterSubscriber(resource, handler);
+        console.log("WS close")
+      })
     }
     catch (e) { //#D
       console.log('Unable to observe %s resource!', url);

@@ -27,7 +27,7 @@ exports.stop = function () {
 };
 
 function handler(resource, prop, value) {
-  console.info("Change detected by plugin for %s: %s = %s", resource.name, prop, value);
+  console.info("LED Plugin: %s: %s = %s", resource.name, prop, value);
   switchOnOff(value); //#B
 }
 
